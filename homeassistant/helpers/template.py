@@ -8,6 +8,7 @@ import logging
 import math
 import random
 import re
+import timeago
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 import jinja2
@@ -928,10 +929,9 @@ def relative_time(value):
     """
     Take a datetime and return its "age" as a string.
 
-    The age can be in second, minute, hour, day, month or year. Only the
-    biggest unit is considered, e.g. if it's 2 days and 3 hours, "2 days" will
-    be returned.
-    Make sure date is not in the future, or else it will return None.
+    The age can be in second, minute, hour, day, month or year. Will
+    return either a string of "X {timeunit} ago" or "in X {timeunit}" 
+    depending on whether the value provided is before, or after the current time.    
 
     If the input are not a datetime object the input will be returned unmodified.
     """
@@ -940,9 +940,8 @@ def relative_time(value):
         return value
     if not value.tzinfo:
         value = dt_util.as_local(value)
-    if dt_util.now() < value:
-        return value
-    return dt_util.get_age(value)
+
+    return timeago.format(value, dt_util.now(), locale)
 
 
 class TemplateEnvironment(ImmutableSandboxedEnvironment):
